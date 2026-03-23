@@ -14,13 +14,16 @@ Process :
 
 import pandas as pd
 from scipy.interpolate import CubicSpline
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent
 
 # 1. Load the data extracted from WebPlotDigitizer
 # Assuming your CSV has no header and two columns: X, Y
-f_beta = pd.read_csv('Howell/Howell_f_beta2.csv', header=None, names=['Beta2', 'f'])
-Phi_Re = pd.read_csv('Howell/Howell_Phi_Re.csv', header=None, names=['Re', 'Phi'])
+f_beta = pd.read_csv(BASE_DIR/'Howell/Howell_f_beta2.csv', header=None, names=['Beta2', 'f'])
+Phi_Re = pd.read_csv(BASE_DIR/'Howell/Howell_Phi_Re.csv', header=None, names=['Re', 'Phi'])
 Phi_Re['Re'] = Phi_Re['Re'] * 1e5 #scale Re by 10^5
-Psi_sigmaInverse = pd.read_csv('Howell/Howell_Psi_solidityINVERSE.csv', header=None, names=['sigmaInverse', 'Psi'])
+Psi_sigmaInverse = pd.read_csv(BASE_DIR/'Howell/Howell_Psi_solidityINVERSE.csv', header=None, names=['sigmaInverse', 'Psi'])
 
 # Sort the data by X just in case the points were clicked out of order
 f_beta = f_beta.sort_values(by='Beta2')
@@ -32,6 +35,12 @@ Psi_sigmaInverse = Psi_sigmaInverse.sort_values(by='sigmaInverse')
 f_function = CubicSpline(f_beta['Beta2'], f_beta['f'])
 Phi_function = CubicSpline(Phi_Re['Re'], Phi_Re['Phi'])
 Psi_function = CubicSpline(Psi_sigmaInverse['sigmaInverse'], Psi_sigmaInverse['Psi'])
+
+# Sort the data so the new x-variable (Psi) is strictly increasing. This is needed by CubicSpline
+Psi_sigmaInverse = Psi_sigmaInverse.sort_values(by='Psi')
+# Now create the inverted function
+SigmaInverse_function = CubicSpline(Psi_sigmaInverse['Psi'], Psi_sigmaInverse['sigmaInverse'])
+
 
 
 def Howell_Loading_Criterion (sigma , Re , Beta_2 , Beta_1):
@@ -49,4 +58,3 @@ def Howell_Loading_Criterion (sigma , Re , Beta_2 , Beta_1):
         return True
     else:
         return False
-

@@ -1,21 +1,35 @@
-from Compressor.triangles import get_compressor_angles , plot_velocity_triangles
-from Compressor.recovery_factor import calculate_recovery_factor
+from Compressor import (
+    get_compressor_angles,
+    plot_velocity_triangles,
+    calculate_recovery_factor,
+    get_optimal_psi,
+    calculate_diffusion_factor,
+    get_solidity_from_DF
+)
+
+#Example problem 
+Phi , R = 0.5 ,0.5
+Psi = get_optimal_psi(Phi)
+print("Psi =" , Psi)
 
 # Get angles for velocity triangles
-angles = get_compressor_angles(R=0.5, psi=0.275, phi=0.55)
+angles = get_compressor_angles(R, Psi, Phi)
 alpha1, alpha2, beta1, beta2 = angles['alpha1'], angles['alpha2'], angles["beta1"] , angles['beta2']
 print(angles)
 
 #plot triangles
-plot_velocity_triangles(alpha1, alpha2, beta1, beta2)
+#plot_velocity_triangles(alpha1, alpha2, beta1, beta2)
+
+#Choose Diffusion factor 
+DF =0.45
+
+#Get solidity from Inverted diffusion Factor equation
+sigma = get_solidity_from_DF(DF, alpha2 , alpha1)
+print("sigma= ",sigma)
 
 #calculate recovery factor
-rr_value = calculate_recovery_factor(alpha1, beta2, phi=0.55)
+rr_value = calculate_recovery_factor(alpha1, beta2, Phi)
 print(f"Recovery Factor: {rr_value}")
-
-
-#Next steps:
-rotor_reflection = beta1- beta2 #TODO: USE Beta angles if you calculate RR for rotor.
 
 #TODO:USE LieBlein loading factor!!
 #incidence should be 3-5 deg, 20 is crazy, 0 is crazy. (negative incidence makes the compressor unstable.)
